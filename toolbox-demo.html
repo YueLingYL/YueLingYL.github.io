@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能工具箱演示</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .toolbox-section {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        /* 工具箱样式 */
+        .tool-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .tool-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .close-button:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        /* 计算器样式 */
+        .calculator-container {
+            padding: 20px;
+        }
+        .calculator-display {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: right;
+            font-size: 32px;
+            font-weight: 300;
+            min-height: 48px;
+            overflow-x: auto;
+        }
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .calculator-button {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calculator-button.digit {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .calculator-button.digit:hover {
+            background-color: #e9ecef;
+        }
+        .calculator-button.operator {
+            background-color: #ff9f0a;
+            color: white;
+        }
+        .calculator-button.operator:hover {
+            background-color: #e68a00;
+        }
+        .calculator-button.function {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .calculator-button.function:hover {
+            background-color: #d0d0d0;
+        }
+        .calculator-button.equals {
+            background-color: #2196f3;
+            color: white;
+        }
+        .calculator-button.equals:hover {
+            background-color: #0b7dda;
+        }
+        /* 工具选择器样式 */
+        .toolbox-container {
+            padding: 20px;
+        }
+        .tool-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .tool-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .tool-card:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #2196f3;
+        }
+        .tool-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #2196f3;
+        }
+        .tool-name {
+            font-size: 14px;
+            color: #333;
+        }
+        /* 文本转换工具样式 */
+        .text-transformer-container {
+            padding: 20px;
+        }
+        .text-input-container {
+            margin-bottom: 16px;
+        }
+        .text-input {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .transform-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .transform-button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .transform-button:hover {
+            background: #e9ecef;
+            border-color: #2196f3;
+        }
+        .result-container {
+            margin-top: 16px;
+        }
+        .result-container h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .result-text {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 60px;
+            font-family: inherit;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .copy-button {
+            margin-top: 8px;
+            padding: 8px 16px;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            background: white;
+            color: #2196f3;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            background: #2196f3;
+            color: white;
+        }
+        /* 工具箱按钮样式 - 主界面显示 */
+        .toolbox-button {
+            width: 200px;
+            height: 50px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        .toolbox-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(33, 150, 243, 0.5);
+        }
+        /* 背景遮罩 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            backdrop-filter: blur(2px);
+        }
+        /* 动画样式 */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        .modal-content {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="container">
+          <h1>多功能工具箱演示</h1>
+          <p>下面是集成到主界面的多功能工具箱，包含计算器和文本转换器等实用工具。</p>
+          
+          <div class="toolbox-section">
+            <!-- 工具箱将在这里渲染 -->
+          </div>
+        </div>
+      </div>
+    
+    <script type="text/babel">
+        // 计算器组件
+        const Calculator = ({ onClose }) => {
+            const [display, setDisplay] = React.useState('0');
+            const [previousValue, setPreviousValue] = React.useState(null);
+            const [operation, setOperation] = React.useState(null);
+            const [waitingForOperand, setWaitingForOperand] = React.useState(false);
+
+            const handleDigit = (digit) => {
+                if (waitingForOperand) {
+                    setDisplay(digit);
+                    setWaitingForOperand(false);
+                } else {
+                    setDisplay(display === '0' ? digit : display + digit);
+                }
+            };
+
+            const handleDecimal = () => {
+                if (waitingForOperand) {
+                    setDisplay('0.');
+                    setWaitingForOperand(false);
+                } else if (!display.includes('.')) {
+                    setDisplay(display + '.');
+                }
+            };
+
+            const handleOperator = (nextOperation) => {
+                const inputValue = parseFloat(display);
+
+                if (previousValue !== null && operation !== null && !waitingForOperand) {
+                    const currentValue = previousValue;
+                    let newValue;
+                    switch (operation) {
+                        case '+':
+                            newValue = currentValue + inputValue;
+                            break;
+                        case '-':
+                            newValue = currentValue - inputValue;
+                            break;
+                        case '*':
+                            newValue = currentValue * inputValue;
+                            break;
+                        case '/':
+                            newValue = currentValue / inputValue;
+                            break;
+                        default:
+                            newValue = inputValue;
+                    }
+                    setDisplay(newValue.toString());
+                    setPreviousValue(newValue.toString());
+                } else {
+                    setPreviousValue(display);
+                }
+                setWaitingForOperand(true);
+                setOperation(nextOperation);
+            };
+
+            const handleEquals = () => {
+                if (operation === null || previousValue === null) {
+                    return;
+                }
+                handleOperator('=');
+                setOperation(null);
+                setPreviousValue(null);
+            };
+
+            const handleClear = () => {
+                setDisplay('0');
+                setPreviousValue(null);
+                setOperation(null);
+                setWaitingForOperand(false);
+            };
+
+            const handleClearEntry = () => {
+                setDisplay('0');
+                setWaitingForOperand(false);
+            };
+
+            const handleNegate = () => {
+                const currentValue = parseFloat(display);
+                if (!isNaN(currentValue)) {
+                    setDisplay((-currentValue).toString());
+                }
+            };
+
+            const handlePercentage = () => {
+                const currentValue = parseFloat(display);
+                if (!isNaN(currentValue)) {
+                    setDisplay((currentValue / 100).toString());
+                    setWaitingForOperand(true);
+                }
+            };
+
+            return (
+                <div className="tool-modal">
+                    <div className="tool-header">
+                        <h2>计算器</h2>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="calculator-container">
+                        <div className="calculator-display">{display}</div>
+                        <div className="calculator-buttons">
+                            <button className="calculator-button function" onClick={handleClear}>AC</button>
+                            <button className="calculator-button function" onClick={handleClearEntry}>CE</button>
+                            <button className="calculator-button function" onClick={handleNegate}>+/-</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('/')}>÷</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('7')}>7</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('8')}>8</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('9')}>9</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('*')}>×</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('4')}>4</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('5')}>5</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('6')}>6</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('-')}>-</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('1')}>1</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('2')}>2</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('3')}>3</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('+')}>+</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('0')}>0</button>
+                            <button className="calculator-button digit" onClick={handleDecimal}>.</button>
+                            <button className="calculator-button function" onClick={handlePercentage}>%</button>
+                            <button className="calculator-button equals" onClick={handleEquals}>=</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 文本转换工具组件
+        const TextTransformer = ({ onClose }) => {
+            const [inputText, setInputText] = React.useState('');
+            const [resultText, setResultText] = React.useState('');
+            const [lastOperation, setLastOperation] = React.useState(null);
+            const resultRef = React.useRef(null);
+
+            const handleTransform = (operation) => {
+                if (!inputText) return;
+                
+                let transformedText = '';
+                
+                switch (operation) {
+                    case 'uppercase':
+                        transformedText = inputText.toUpperCase();
+                        break;
+                    case 'lowercase':
+                        transformedText = inputText.toLowerCase();
+                        break;
+                    case 'capitalize':
+                        transformedText = inputText.split(' ').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ).join(' ');
+                        break;
+                    case 'reverse':
+                        transformedText = inputText.split('').reverse().join('');
+                        break;
+                    case 'remove-spaces':
+                        transformedText = inputText.replace(/\s+/g, '');
+                        break;
+                    case 'count':
+                        const charCount = inputText.length;
+                        const wordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
+                        const lineCount = inputText.split('\n').length;
+                        transformedText = `字符数: ${charCount}\n单词数: ${wordCount}\n行数: ${lineCount}`;
+                        break;
+                    default:
+                        transformedText = inputText;
+                }
+                
+                setResultText(transformedText);
+                setLastOperation(operation);
+            };
+
+            const handleClear = () => {
+                setInputText('');
+                setResultText('');
+                setLastOperation(null);
+            };
+
+            const handleRefresh = () => {
+                if (lastOperation) {
+                    handleTransform(lastOperation);
+                }
+            };
+
+            const handleCopyResult = () => {
+                if (resultText) {
+                    navigator.clipboard.writeText(resultText).then(() => {
+                        alert('已复制到剪贴板！');
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                    });
+                }
+            };
+
+            return (
+                <div className="tool-modal">
+                    <div className="tool-header">
+                        <h2>文本转换器</h2>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="text-transformer-container">
+                        <div className="text-input-container">
+                            <textarea
+                                className="text-input"
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                placeholder="请输入要转换的文本..."
+                                rows={6}
+                            />
+                        </div>
+                        
+                        <div className="transform-buttons">
+                            <button className="transform-button" onClick={() => handleTransform('uppercase')}>
+                                全部大写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('lowercase')}>
+                                全部小写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('capitalize')}>
+                                首字母大写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('reverse')}>
+                                反转文本
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('remove-spaces')}>
+                                移除空格
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('count')}>
+                                统计字数
+                            </button>
+                            <button className="transform-button" onClick={handleClear}>
+                                清空
+                            </button>
+                            <button className="transform-button" onClick={handleRefresh}>
+                                刷新
+                            </button>
+                        </div>
+                        
+                        {resultText && (
+                            <div className="result-container">
+                                <h3>转换结果：</h3>
+                                <div className="result-text" ref={resultRef}>
+                                    {resultText}
+                                </div>
+                                <button className="copy-button" onClick={handleCopyResult}>
+                                    复制结果
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // 工具选择器组件
+        const ToolboxSelector = ({ onClose }) => {
+            const [selectedTool, setSelectedTool] = React.useState(null);
+
+            const openTool = (toolId) => {
+                setSelectedTool(toolId);
+            };
+
+            const closeToolModal = () => {
+                setSelectedTool(null);
+            };
+
+            return (
+                <>
+                    {selectedTool ? (
+                        selectedTool === 'calculator' ? (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <Calculator onClose={closeToolModal} />
+                                </div>
+                            </>
+                        ) : selectedTool === 'text-transformer' ? (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <TextTransformer onClose={closeToolModal} />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <div className="tool-modal">
+                                        <div className="tool-header">
+                                            <h2>工具未找到</h2>
+                                            <button className="close-button" onClick={closeToolModal}>×</button>
+                                        </div>
+                                        <div className="toolbox-container">
+                                            <p>抱歉，找不到您选择的工具。</p>
+                                            <button onClick={closeToolModal} className="copy-button">
+                                                返回工具箱
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )
+                    ) : (
+                        <div className="toolbox-container">
+                            <h2>多功能工具箱</h2>
+                            <p>选择您需要的工具：</p>
+                            <div className="tool-selector">
+                                <div 
+                                    className="tool-card" 
+                                    onClick={() => openTool('calculator')}
+                                >
+                                    <div className="tool-icon">🧮</div>
+                                    <div className="tool-name">计算器</div>
+                                </div>
+                                <div 
+                                    className="tool-card" 
+                                    onClick={() => openTool('text-transformer')}
+                                >
+                                    <div className="tool-icon">📝</div>
+                                    <div className="tool-name">文本转换器</div>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                <button onClick={onClose} className="copy-button">
+                                    关闭工具箱
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        };
+
+        // 工具箱主组件
+        const Toolbox = () => {
+            const [isOpen, setIsOpen] = React.useState(false);
+
+            const toggleToolbox = () => {
+                setIsOpen(!isOpen);
+            };
+
+            return (
+                <>
+                    {/* 工具箱启动按钮 */}
+                    <button 
+                        onClick={toggleToolbox} 
+                        className="toolbox-button"
+                        aria-label="打开工具箱"
+                        style={{
+                            width: '200px',
+                            height: '50px',
+                            backgroundColor: '#2196f3',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '25px',
+                            fontSize: '16px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            transition: 'all 0.3s ease',
+                            margin: '20px auto',
+                            boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)'
+                        }}
+                    >
+                        🧰 打开工具箱
+                    </button>
+
+                    {/* 工具箱面板 */}
+                    {isOpen && (
+                        <>
+                            {/* 背景遮罩 */}
+                            <div 
+                                onClick={toggleToolbox}
+                                className="modal-backdrop"
+                            />
+                            
+                            {/* 工具箱内容 */}
+                            <div 
+                                className="modal-content"
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                    position: 'fixed',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    backgroundColor: 'white',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+                                    zIndex: 999,
+                                    width: '90%',
+                                    maxWidth: '600px',
+                                    maxHeight: '90vh',
+                                    overflowY: 'auto'
+                                }}
+                            >
+                                <ToolboxSelector onClose={toggleToolbox} />
+                            </div>
+                        </>
+                    )}
+                </>
+            );
+        };
+
+        // 渲染应用
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <div class="container">
+                  <h1>多功能工具箱演示</h1>
+                  <p>下面是集成到主界面的多功能工具箱，包含计算器和文本转换器等实用工具。</p>
+                  
+                  <div class="toolbox-section">
+                    {/* 工具箱将在这里渲染 */}
+                    <Toolbox />
+                  </div>
+                </div>
+            </React.StrictMode>
+        );
+    </script>
+</body>
+</html>

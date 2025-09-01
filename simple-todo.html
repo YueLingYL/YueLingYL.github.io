@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple To-Do List</title>
+    <!-- 添加Font Awesome用于图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* 账号相关样式 */
+        .auth-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .auth-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .auth-button {
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1rem;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .auth-toggle:hover {
+            text-decoration: underline;
+        }
+
+        /* 用户信息和语言切换 */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+        }
+
+        .logout-button {
+            background-color: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #fee2e2;
+        }
+
+        .language-selector {
+            padding: 0.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .add-todo {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .todo-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .todo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .add-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .todo-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .todo-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+        
+        .todo-item.completed {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .todo-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .todo-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .todo-text {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .todo-item.completed .todo-text {
+            color: #6b7280;
+            text-decoration: line-through;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .edit-button,
+        .delete-button {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .edit-button:hover {
+            background-color: #f3f4f6;
+            border-color: #667eea;
+            color: #667eea;
+        }
+        
+        .delete-button:hover {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-button {
+            padding: 0.5rem 1rem;
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-button.active {
+            background-color: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .todo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+        
+        .todo-count {
+            color: #666;
+        }
+        
+        .clear-button {
+            background-color: transparent;
+            color: #666;
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .clear-button:hover {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            background-color: #f9fafb;
+        }
+        
+        /* Edit mode */
+        .edit-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .edit-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .save-button,
+        .cancel-button {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .save-button {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .save-button:hover {
+            background-color: #059669;
+        }
+        
+        .cancel-button {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .cancel-button:hover {
+            background-color: #4b5563;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .add-todo {
+                flex-direction: column;
+            }
+            
+            .add-button {
+                width: 100%;
+            }
+            
+            .todo-footer {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册界面 -->
+    <div id="authContainer" class="auth-container" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h1 id="authTitle">Sign In</h1>
+            <select id="authLanguageSelector" class="language-selector">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
+        <form id="authForm" class="auth-form">
+            <input type="text" id="authUsername" class="auth-input" placeholder="Username">
+            <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+            <button type="submit" id="authSubmit" class="auth-button">Sign In</button>
+        </form>
+        <div id="authToggle" class="auth-toggle">Create an account</div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div id="appContainer" class="container">
+        <div class="header-bar">
+            <div class="user-info">
+                <span id="currentUser"></span>
+                <button id="logoutButton" class="logout-button"></button>
+            </div>
+            <select id="languageSelector" class="language-selector">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
+        
+        <h1 id="appTitle">To-Do List</h1>
+        
+        <div class="add-todo">
+            <input type="text" id="todoInput" placeholder="Add a new task..." class="todo-input">
+            <button id="addButton" class="add-button">Add</button>
+        </div>
+        
+        <div class="filters">
+            <button class="filter-button active" data-filter="all" data-i18n="all">All</button>
+            <button class="filter-button" data-filter="active" data-i18n="active">Active</button>
+            <button class="filter-button" data-filter="completed" data-i18n="completed">Completed</button>
+        </div>
+        
+        <ul id="todoList" class="todo-list">
+            <!-- Tasks will be added here -->
+            <li class="empty-message">No tasks yet. Add a new task above!</li>
+        </ul>
+        
+        <div class="todo-footer">
+            <span id="todoCount" class="todo-count">0 items left</span>
+                <button id="clearButton" class="clear-button" style="display: none;" data-i18n="clearCompleted">Clear completed</button>
+        </div>
+    </div>
+    
+    <script>
+        // 语言翻译对象
+        const translations = {
+            en: {
+                appTitle: "To-Do List",
+                addPlaceholder: "Add a new task...",
+                addButton: "Add",
+                all: "All",
+                active: "Active",
+                completed: "Completed",
+                clearCompleted: "Clear completed",
+                noTasks: "No tasks yet. Add a new task above!",
+                noActiveTasks: "No active tasks left!",
+                noCompletedTasks: "No completed tasks yet!",
+                editButton: "Edit",
+                deleteButton: "Delete",
+                saveButton: "Save",
+                cancelButton: "Cancel",
+                authTitleSignIn: "Sign In",
+                authTitleSignUp: "Sign Up",
+                authSubmitSignIn: "Sign In",
+                authSubmitSignUp: "Sign Up",
+                authToggleSignIn: "Create an account",
+                authToggleSignUp: "Already have an account? Sign in",
+                usernamePlaceholder: "Username",
+                passwordPlaceholder: "Password",
+                logout: "Logout"
+            },
+            zh: {
+                appTitle: "待办事项",
+                addPlaceholder: "添加新任务...",
+                addButton: "添加",
+                all: "全部",
+                active: "进行中",
+                completed: "已完成",
+                clearCompleted: "清除已完成",
+                noTasks: "还没有任务。在上方添加新任务！",
+                noActiveTasks: "没有进行中的任务！",
+                noCompletedTasks: "还没有已完成的任务！",
+                editButton: "编辑",
+                deleteButton: "删除",
+                saveButton: "保存",
+                cancelButton: "取消",
+                authTitleSignIn: "登录",
+                authTitleSignUp: "注册",
+                authSubmitSignIn: "登录",
+                authSubmitSignUp: "注册",
+                authToggleSignIn: "创建账号",
+                authToggleSignUp: "已有账号？登录",
+                usernamePlaceholder: "用户名",
+                passwordPlaceholder: "密码",
+                logout: "退出"
+            }
+        };
+
+        // DOM Elements
+        const todoInput = document.getElementById('todoInput');
+        const addButton = document.getElementById('addButton');
+        const todoList = document.getElementById('todoList');
+        const todoCount = document.getElementById('todoCount');
+        const clearButton = document.getElementById('clearButton');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const languageSelector = document.getElementById('languageSelector');
+        const authLanguageSelector = document.getElementById('authLanguageSelector');
+        const appContainer = document.getElementById('appContainer');
+        const authContainer = document.getElementById('authContainer');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authSubmit = document.getElementById('authSubmit');
+        const authToggle = document.getElementById('authToggle');
+        const authUsername = document.getElementById('authUsername');
+        const authPassword = document.getElementById('authPassword');
+        const currentUser = document.getElementById('currentUser');
+        const logoutButton = document.getElementById('logoutButton');
+        const appTitle = document.getElementById('appTitle');
+        
+        // State
+        let todos = [];
+        let currentFilter = 'all';
+        let editingTodoId = null;
+        let currentLanguage = 'en';
+        let currentUserId = null;
+        let isSignUpMode = false;
+
+        // 检查是否有用户登录
+        function checkUserAuthentication() {
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                currentUserId = storedUser;
+                showApp();
+            } else {
+                showAuth();
+            }
+        }
+
+        // 显示认证界面
+        function showAuth() {
+            authContainer.style.display = 'block';
+            appContainer.style.display = 'none';
+            updateAuthText();
+        }
+
+        // 显示应用界面
+        function showApp() {
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            loadUserTodos();
+            renderTodos();
+            updateUI();
+        }
+
+        // 切换登录/注册模式
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            authUsername.value = '';
+            authPassword.value = '';
+            updateAuthText();
+        }
+
+        // 更新认证界面文本
+        function updateAuthText() {
+            // 确保认证界面语言选择器与当前语言一致
+            authLanguageSelector.value = currentLanguage;
+            authTitle.textContent = isSignUpMode ? translations[currentLanguage].authTitleSignUp : translations[currentLanguage].authTitleSignIn;
+            authSubmit.textContent = isSignUpMode ? translations[currentLanguage].authSubmitSignUp : translations[currentLanguage].authSubmitSignIn;
+            authToggle.textContent = isSignUpMode ? translations[currentLanguage].authToggleSignUp : translations[currentLanguage].authToggleSignIn;
+            authUsername.placeholder = translations[currentLanguage].usernamePlaceholder;
+            authPassword.placeholder = translations[currentLanguage].passwordPlaceholder;
+        }
+
+        // 处理认证表单提交
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            const username = authUsername.value.trim();
+            const password = authPassword.value.trim();
+            
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+            
+            if (isSignUpMode) {
+                // 注册新用户
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                if (users[username]) {
+                    alert('Username already exists');
+                    return;
+                }
+                
+                // 简单的密码存储（实际应用中应该使用更安全的方法）
+                users[username] = password;
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // 自动登录新用户
+                currentUserId = username;
+                localStorage.setItem('currentUser', currentUserId);
+                showApp();
+            } else {
+                // 登录现有用户
+                const users = JSON.parse(localStorage.getItem('users')) || {};
+                if (users[username] === password) {
+                    currentUserId = username;
+                    localStorage.setItem('currentUser', currentUserId);
+                    showApp();
+                } else {
+                    alert('Invalid username or password');
+                }
+            }
+        }
+
+        // 注销用户
+        function logout() {
+            currentUserId = null;
+            localStorage.removeItem('currentUser');
+            showAuth();
+        }
+
+        // 加载用户的待办事项
+        function loadUserTodos() {
+            if (currentUserId) {
+                todos = JSON.parse(localStorage.getItem(`todos_${currentUserId}`)) || [];
+            } else {
+                todos = JSON.parse(localStorage.getItem('todos_guest')) || [];
+            }
+        }
+
+        // 保存用户的待办事项
+        function saveTodos() {
+            if (currentUserId) {
+                localStorage.setItem(`todos_${currentUserId}`, JSON.stringify(todos));
+            } else {
+                localStorage.setItem('todos_guest', JSON.stringify(todos));
+            }
+        }
+
+        // 更新UI文本
+        function updateUI() {
+            // 确保主应用界面语言选择器与当前语言一致
+            languageSelector.value = currentLanguage;
+            appTitle.textContent = translations[currentLanguage].appTitle;
+            todoInput.placeholder = translations[currentLanguage].addPlaceholder;
+            addButton.textContent = translations[currentLanguage].addButton;
+            
+            // 更新所有带有data-i18n属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            // 更新用户信息和退出按钮
+            if (currentUserId) {
+                currentUser.innerHTML = `<i class="fas fa-user"></i> ${currentUserId}`;
+            } else {
+                currentUser.innerHTML = `<i class="fas fa-user"></i> Guest`;
+            }
+            
+            logoutButton.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${translations[currentLanguage].logout || 'Logout'}`;
+        }
+
+        // 切换语言
+        function changeLanguage(language) {
+            if (translations[language]) {
+                currentLanguage = language;
+                // 同步两个语言选择器的状态
+                languageSelector.value = language;
+                authLanguageSelector.value = language;
+                updateUI();
+                updateAuthText(); // 更新认证界面文本
+                renderTodos(); // 重新渲染以更新所有文本
+            }
+        }
+        
+        // Render todos
+        function renderTodos() {
+            todoList.innerHTML = '';
+            
+            // Filter todos based on current filter
+            const filteredTodos = todos.filter(todo => {
+                if (currentFilter === 'active') return !todo.completed;
+                if (currentFilter === 'completed') return todo.completed;
+                return true;
+            });
+            
+            // Update count
+            const activeCount = todos.filter(todo => !todo.completed).length;
+            todoCount.textContent = `${activeCount} item${activeCount !== 1 ? 's' : ''} left`;
+            
+            // Show/hide clear button
+            clearButton.style.display = todos.some(todo => todo.completed) ? 'block' : 'none';
+            
+            // Check if there are todos
+            if (filteredTodos.length === 0) {
+                const emptyMessage = document.createElement('li');
+                emptyMessage.className = 'empty-message';
+                
+                if (currentFilter === 'all') {
+                    emptyMessage.textContent = translations[currentLanguage].noTasks;
+                } else if (currentFilter === 'active') {
+                    emptyMessage.textContent = translations[currentLanguage].noActiveTasks;
+                } else {
+                    emptyMessage.textContent = translations[currentLanguage].noCompletedTasks;
+                }
+                
+                todoList.appendChild(emptyMessage);
+                return;
+            }
+            
+            // Render each todo
+            filteredTodos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                li.setAttribute('data-id', todo.id);
+                
+                if (editingTodoId === todo.id) {
+                    // Editing mode
+                    li.innerHTML = `
+                        <input type="text" class="edit-input" value="${todo.text}">
+                        <div class="edit-buttons">
+                            <button class="save-button">${translations[currentLanguage].saveButton}</button>
+                            <button class="cancel-button">${translations[currentLanguage].cancelButton}</button>
+                        </div>
+                    `;
+                    
+                    const editInput = li.querySelector('.edit-input');
+                    const saveButton = li.querySelector('.save-button');
+                    const cancelButton = li.querySelector('.cancel-button');
+                    
+                    // Focus the input
+                    setTimeout(() => editInput.focus(), 0);
+                    
+                    // Event listeners for edit mode
+                    editInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') saveButton.click();
+                    });
+                    
+                    saveButton.addEventListener('click', () => {
+                        const newText = editInput.value.trim();
+                        if (newText) {
+                            updateTodo(todo.id, { text: newText });
+                        } else {
+                            deleteTodo(todo.id);
+                        }
+                        editingTodoId = null;
+                        renderTodos();
+                    });
+                    
+                    cancelButton.addEventListener('click', () => {
+                        editingTodoId = null;
+                        renderTodos();
+                    });
+                } else {
+                    // Normal view
+                    li.innerHTML = `
+                        <div class="todo-content">
+                            <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
+                            <span class="todo-text">${todo.text}</span>
+                        </div>
+                        <div class="todo-actions">
+                            <button class="edit-button">${translations[currentLanguage].editButton}</button>
+                            <button class="delete-button">${translations[currentLanguage].deleteButton}</button>
+                        </div>
+                    `;
+                    
+                    // Event listeners
+                    const checkbox = li.querySelector('.todo-checkbox');
+                    const todoText = li.querySelector('.todo-text');
+                    const editButton = li.querySelector('.edit-button');
+                    const deleteButton = li.querySelector('.delete-button');
+                    
+                    checkbox.addEventListener('change', () => {
+                        toggleTodoStatus(todo.id);
+                    });
+                    
+                    todoText.addEventListener('click', () => {
+                        toggleTodoStatus(todo.id);
+                    });
+                    
+                    editButton.addEventListener('click', () => {
+                        editingTodoId = todo.id;
+                        renderTodos();
+                    });
+                    
+                    deleteButton.addEventListener('click', () => {
+                        deleteTodo(todo.id);
+                    });
+                }
+                
+                todoList.appendChild(li);
+            });
+        }
+        
+        // Add a new todo
+        function addTodo(text) {
+            const newTodo = {
+                id: Date.now().toString(),
+                text: text.trim(),
+                completed: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            todos.push(newTodo);
+            saveTodos();
+            renderTodos();
+        }
+        
+        // Toggle todo status
+        function toggleTodoStatus(id) {
+            todos = todos.map(todo => 
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            );
+            saveTodos();
+            renderTodos();
+        }
+        
+        // Delete todo
+        function deleteTodo(id) {
+            todos = todos.filter(todo => todo.id !== id);
+            saveTodos();
+            renderTodos();
+        }
+        
+        // Update todo
+        function updateTodo(id, updates) {
+            todos = todos.map(todo => 
+                todo.id === id ? { ...todo, ...updates } : todo
+            );
+            saveTodos();
+        }
+        
+        // Clear completed todos
+        function clearCompleted() {
+            todos = todos.filter(todo => !todo.completed);
+            saveTodos();
+            renderTodos();
+        }
+        
+        // Save todos to localStorage
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+        
+        // Set filter
+        function setFilter(filter) {
+            currentFilter = filter;
+            filterButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.filter === filter) {
+                    button.classList.add('active');
+                }
+            });
+            renderTodos();
+        }
+        
+        // 添加认证相关的事件监听器
+        authForm.addEventListener('submit', handleAuthSubmit);
+        authToggle.addEventListener('click', toggleAuthMode);
+        logoutButton.addEventListener('click', logout);
+        languageSelector.addEventListener('change', (e) => changeLanguage(e.target.value));
+        authLanguageSelector.addEventListener('change', (e) => changeLanguage(e.target.value));
+
+        // Event listeners
+        addButton.addEventListener('click', () => {
+            const text = todoInput.value.trim();
+            if (text) {
+                addTodo(text);
+                todoInput.value = '';
+            }
+        });
+        
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addButton.click();
+            }
+        });
+        
+        clearButton.addEventListener('click', clearCompleted);
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setFilter(button.dataset.filter);
+            });
+        });
+        
+        // 初始化
+        checkUserAuthentication();
+    </script>
+</body>
+</html>
