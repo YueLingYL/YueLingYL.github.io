@@ -1,0 +1,369 @@
+/* App容器样式 */
+.app-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+/* 头部样式 */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  font-weight: 400;
+}
+
+/* 待办事项容器 */
+.todo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 添加待办事项区域 */
+.add-todo {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.todo-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.todo-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.add-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+
+.add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.add-button:active {
+  transform: translateY(0);
+}
+
+/* 待办事项列表 */
+.todo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* 自定义滚动条 */
+.todo-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 空列表提示 */
+.empty-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+/* 待办事项项 */
+.todo-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.todo-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.todo-item.completed {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.todo-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.todo-text {
+  flex: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  word-break: break-word;
+}
+
+.todo-item.completed .todo-text {
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+/* 待办事项操作按钮 */
+.todo-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.todo-item:hover .todo-actions {
+  opacity: 1;
+}
+
+.edit-button,
+.delete-button {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #e5e7eb;
+}
+
+.edit-button:hover {
+  background-color: #f3f4f6;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.delete-button:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* 编辑模式样式 */
+.edit-container {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-button,
+.cancel-button {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: none;
+}
+
+.save-button {
+  background-color: #10b981;
+}
+
+.save-button:hover {
+  background-color: #059669;
+}
+
+.cancel-button {
+  background-color: #6b7280;
+}
+
+.cancel-button:hover {
+  background-color: #4b5563;
+}
+
+/* 底部控制栏 */
+.todo-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.todo-count {
+  color: #666;
+  font-weight: 500;
+}
+
+/* 过滤器按钮组 */
+.filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-button {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid transparent;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.filter-button:hover {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.filter-button.active {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* 清除已完成按钮 */
+.clear-button {
+  background-color: transparent;
+  color: #666;
+  border: 1px solid #e5e7eb;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.clear-button:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* 信息提示 */
+.info {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  color: #0369a1;
+  font-size: 0.875rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .add-todo {
+    flex-direction: column;
+  }
+  
+  .add-button {
+    width: 100%;
+  }
+  
+  .todo-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .filters {
+    justify-content: center;
+  }
+  
+  .clear-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 1rem;
+    margin: 0.5rem;
+    border-radius: 8px;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .todo-item {
+    padding: 0.75rem;
+  }
+  
+  .todo-actions {
+    opacity: 1;
+    flex-direction: column;
+  }
+  
+  .edit-buttons {
+    flex-direction: column;
+  }
+}

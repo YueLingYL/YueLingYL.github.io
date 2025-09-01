@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能工具箱</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .toolbox-section {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+        }
+        /* 工具箱样式 */
+        .tool-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .tool-header h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .close-button:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        /* 计算器样式 */
+        .calculator-container {
+            padding: 20px;
+        }
+        .calculator-display {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: right;
+            font-size: 32px;
+            font-weight: 300;
+            min-height: 48px;
+            overflow-x: auto;
+        }
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .calculator-button {
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calculator-button.digit {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .calculator-button.digit:hover {
+            background-color: #e9ecef;
+        }
+        .calculator-button.operator {
+            background-color: #ff9f0a;
+            color: white;
+        }
+        .calculator-button.operator:hover {
+            background-color: #e68a00;
+        }
+        .calculator-button.function {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .calculator-button.function:hover {
+            background-color: #d0d0d0;
+        }
+        .calculator-button.equals {
+            background-color: #2196f3;
+            color: white;
+        }
+        .calculator-button.equals:hover {
+            background-color: #0b7dda;
+        }
+        /* 工具选择器样式 */
+        .toolbox-container {
+            padding: 20px;
+        }
+        .tool-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .tool-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .tool-card:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #2196f3;
+        }
+        .tool-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #2196f3;
+        }
+        .tool-name {
+            font-size: 14px;
+            color: #333;
+        }
+        /* 文本转换工具样式 */
+        .text-transformer-container {
+            padding: 20px;
+        }
+        .text-input-container {
+            margin-bottom: 16px;
+        }
+        .text-input {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .transform-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        /* 工具箱面板样式 */
+        .toolbox-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+        .transform-button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .transform-button:hover {
+            background: #e9ecef;
+            border-color: #2196f3;
+        }
+        .result-container {
+            margin-top: 16px;
+        }
+        .result-container h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .result-text {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            min-height: 60px;
+            font-family: inherit;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .copy-button {
+            margin-top: 8px;
+            padding: 8px 16px;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            background: white;
+            color: #2196f3;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .copy-button:hover {
+            background: #2196f3;
+            color: white;
+        }
+        /* 工具箱按钮样式 - 主界面显示 */
+        .toolbox-button {
+            width: 200px;
+            height: 50px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin: 20px auto;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        .toolbox-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(33, 150, 243, 0.5);
+        }
+        /* 背景遮罩 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            backdrop-filter: blur(2px);
+        }
+        /* 动画样式 */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+        .modal-content {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        /* 图片压缩工具样式 */
+        .image-compressor-container {
+            padding: 20px;
+        }
+        .compression-controls {
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .quality-control {
+            margin-top: 15px;
+        }
+        .quality-control label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .quality-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .quality-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+        .image-preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .image-preview {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .compression-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .compress-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #4caf50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .compress-button:hover:not(:disabled) {
+            background: #45a049;
+        }
+        .compress-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .reset-button {
+            padding: 10px 20px;
+            border: 1px solid #666;
+            border-radius: 6px;
+            background: white;
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .reset-button:hover {
+            background: #f5f5f5;
+        }
+        .download-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #2196f3;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .download-button:hover {
+            background: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="container">
+          <h1>多功能工具箱</h1>
+          <p>欢迎使用多功能工具箱，包含计算器和文本转换器等实用工具。</p>
+          
+          <div class="toolbox-section">
+            <!-- 工具箱将在这里渲染 -->
+          </div>
+        </div>
+      </div>
+    
+    <script type="text/babel">
+        // 图片压缩工具组件
+        const ImageCompressor = ({ onClose }) => {
+            const [selectedImage, setSelectedImage] = React.useState(null);
+            const [compressedImage, setCompressedImage] = React.useState(null);
+            const [compressionQuality, setCompressionQuality] = React.useState(0.7);
+            const [originalSize, setOriginalSize] = React.useState(0);
+            const [compressedSize, setCompressedSize] = React.useState(0);
+            const [isCompressing, setIsCompressing] = React.useState(false);
+            const [compressionStatus, setCompressionStatus] = React.useState('');
+
+            const handleImageChange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    // 检查文件类型是否为图片
+                    if (!file.type.startsWith('image/')) {
+                        alert('请选择图片文件！');
+                        return;
+                    }
+
+                    setOriginalSize(file.size);
+                    
+                    // 使用FileReader替代URL.createObjectURL，增强兼容性
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        setSelectedImage(event.target.result);
+                        setCompressedImage(null);
+                        setCompressedSize(0);
+                        setCompressionStatus('');
+                    };
+                    reader.onerror = () => {
+                        alert('文件读取失败，请重试！');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const compressImage = () => {
+                if (!selectedImage) {
+                    alert('请先选择图片！');
+                    return;
+                }
+
+                setIsCompressing(true);
+                setCompressionStatus('正在准备图片...');
+
+                // 创建画布进行图片压缩
+                const img = new Image();
+                // 设置crossOrigin以避免跨域问题
+                img.crossOrigin = 'anonymous';
+                img.src = selectedImage;
+
+                img.onload = () => {
+                    setCompressionStatus('正在压缩图片...');
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // 保持原始宽高比
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    // 在画布上绘制图片
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // 转换为压缩后的图片
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            setCompressedImage(URL.createObjectURL(blob));
+                            setCompressedSize(blob.size);
+                            setCompressionStatus('压缩完成！');
+                        } else {
+                            alert('图片压缩失败，请重试！');
+                            setCompressionStatus('压缩失败');
+                        }
+                        setIsCompressing(false);
+                    }, 'image/jpeg', compressionQuality);
+                };
+
+                img.onerror = () => {
+                    console.error('图片加载失败', img.src);
+                    alert('图片加载失败，请重试！');
+                    setCompressionStatus('图片加载失败');
+                    setIsCompressing(false);
+                };
+            };
+
+            const downloadCompressedImage = () => {
+                if (!compressedImage) {
+                    alert('没有可下载的压缩图片！');
+                    return;
+                }
+
+                try {
+                    const a = document.createElement('a');
+                    // 确保使用正确的URL和文件名
+                    a.href = compressedImage;
+                    
+                    // 尝试从原始文件名生成更有意义的下载文件名
+                    let originalFilename = 'image';
+                    const fileInput = document.getElementById('imageInput');
+                    if (fileInput && fileInput.files && fileInput.files[0]) {
+                        originalFilename = fileInput.files[0].name.split('.')[0];
+                    }
+                    
+                    a.download = `${originalFilename}-compressed-${Math.round(compressionQuality * 100)}.jpg`;
+                    
+                    // 为了确保在所有浏览器中正常工作，使用额外的措施
+                    document.body.appendChild(a);
+                    
+                    // 强制触发点击事件
+                    const clickEvent = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    a.dispatchEvent(clickEvent);
+                    
+                    // 清理元素
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        // 释放URL对象以避免内存泄漏
+                        URL.revokeObjectURL(compressedImage);
+                    }, 100);
+                } catch (error) {
+                    console.error('下载图片失败:', error);
+                    alert('下载图片失败，请重试！');
+                }
+            };
+
+            const resetCompression = () => {
+                setSelectedImage(null);
+                setCompressedImage(null);
+                setOriginalSize(0);
+                setCompressedSize(0);
+                document.getElementById('imageInput')?.value && (document.getElementById('imageInput').value = '');
+            };
+
+            const formatFileSize = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+
+            return (
+                <div className="tool-modal">
+                    <div className="tool-header">
+                        <h2>图片压缩工具</h2>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="image-compressor-container">
+                        <div className="compression-controls">
+                            <div className="input-group">
+                                <label htmlFor="imageInput">选择图片：</label>
+                                <input
+                                    type="file"
+                                    id="imageInput"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                />
+                            </div>
+                            
+                            {selectedImage && (
+                                <div className="quality-control">
+                                    <label>压缩质量：{Math.round(compressionQuality * 100)}%</label>
+                                    <input
+                                        type="range"
+                                        min="0.1"
+                                        max="1"
+                                        step="0.1"
+                                        value={compressionQuality}
+                                        onChange={(e) => setCompressionQuality(parseFloat(e.target.value))}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {selectedImage && (
+                                <div className="image-preview-container">
+                                    <div className="image-preview">
+                                        <h3>原始图片</h3>
+                                        <img src={selectedImage} alt="原始图片" className="preview-image" />
+                                        <p>大小: {formatFileSize(originalSize)}</p>
+                                    </div>
+
+                                    <div className="compression-actions">
+                                        <button 
+                                            className="compress-button" 
+                                            onClick={compressImage}
+                                            disabled={isCompressing}
+                                        >
+                                            {isCompressing ? '压缩中...' : '开始压缩'}
+                                        </button>
+                                        <button className="reset-button" onClick={resetCompression}>
+                                            重置
+                                        </button>
+                                        {compressionStatus && (
+                                            <div className="compression-status" style={{ marginLeft: '10px', padding: '8px', fontSize: '14px', color: '#333' }}>
+                                                {compressionStatus}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                {compressedImage && (
+                                    <div className="image-preview">
+                                        <h3>压缩后图片</h3>
+                                        <img src={compressedImage} alt="压缩后图片" className="preview-image" />
+                                        <p>大小: {formatFileSize(compressedSize)}</p>
+                                        {originalSize > 0 && (
+                                            <p>压缩率: {Math.round((1 - compressedSize / originalSize) * 100)}%</p>
+                                        )}
+                                        <button 
+                                            className="download-button"
+                                            onClick={downloadCompressedImage}
+                                        >
+                                            下载压缩图片
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // 计算器组件
+        const Calculator = ({ onClose }) => {
+            const [display, setDisplay] = React.useState('0');
+            const [previousValue, setPreviousValue] = React.useState(null);
+            const [operation, setOperation] = React.useState(null);
+            const [waitingForOperand, setWaitingForOperand] = React.useState(false);
+
+            const handleDigit = (digit) => {
+                if (waitingForOperand) {
+                    setDisplay(digit);
+                    setWaitingForOperand(false);
+                } else {
+                    setDisplay(display === '0' ? digit : display + digit);
+                }
+            };
+
+            const handleDecimal = () => {
+                if (waitingForOperand) {
+                    setDisplay('0.');
+                    setWaitingForOperand(false);
+                } else if (!display.includes('.')) {
+                    setDisplay(display + '.');
+                }
+            };
+
+            const handleOperator = (nextOperation) => {
+                const inputValue = parseFloat(display);
+
+                if (previousValue !== null && operation !== null && !waitingForOperand) {
+                    const currentValue = parseFloat(previousValue);
+                    let newValue;
+                    switch (operation) {
+                        case '+':
+                            newValue = currentValue + inputValue;
+                            break;
+                        case '-':
+                            newValue = currentValue - inputValue;
+                            break;
+                        case '*':
+                            newValue = currentValue * inputValue;
+                            break;
+                        case '/':
+                            newValue = currentValue / inputValue;
+                            break;
+                        default:
+                            newValue = inputValue;
+                    }
+                    setDisplay(newValue.toString());
+                    setPreviousValue(newValue);
+                } else {
+                    setPreviousValue(parseFloat(display));
+                }
+                setWaitingForOperand(true);
+                setOperation(nextOperation);
+            };
+
+            const handleEquals = () => {
+                if (operation === null || previousValue === null) {
+                    return;
+                }
+                
+                const inputValue = parseFloat(display);
+                const currentValue = parseFloat(previousValue);
+                let newValue;
+                
+                switch (operation) {
+                    case '+':
+                        newValue = currentValue + inputValue;
+                        break;
+                    case '-':
+                        newValue = currentValue - inputValue;
+                        break;
+                    case '*':
+                        newValue = currentValue * inputValue;
+                        break;
+                    case '/':
+                        newValue = currentValue / inputValue;
+                        break;
+                    default:
+                        newValue = inputValue;
+                }
+                
+                setDisplay(newValue.toString());
+                setOperation(null);
+                setPreviousValue(null);
+                setWaitingForOperand(true);
+            };
+
+            const handleClear = () => {
+                setDisplay('0');
+                setPreviousValue(null);
+                setOperation(null);
+                setWaitingForOperand(false);
+            };
+
+            const handleClearEntry = () => {
+                setDisplay('0');
+                setWaitingForOperand(false);
+            };
+
+            const handleNegate = () => {
+                const currentValue = parseFloat(display);
+                if (!isNaN(currentValue)) {
+                    setDisplay((-currentValue).toString());
+                }
+            };
+
+            const handlePercentage = () => {
+                const currentValue = parseFloat(display);
+                if (!isNaN(currentValue)) {
+                    setDisplay((currentValue / 100).toString());
+                    setWaitingForOperand(true);
+                }
+            };
+
+            return (
+                <div className="tool-modal">
+                    <div className="tool-header">
+                        <h2>计算器</h2>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="calculator-container">
+                        <div className="calculator-display">{display}</div>
+                        <div className="calculator-buttons">
+                            <button className="calculator-button function" onClick={handleClear}>AC</button>
+                            <button className="calculator-button function" onClick={handleClearEntry}>CE</button>
+                            <button className="calculator-button function" onClick={handleNegate}>+/-</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('/')}>÷</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('7')}>7</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('8')}>8</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('9')}>9</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('*')}>×</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('4')}>4</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('5')}>5</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('6')}>6</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('-')}>-</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('1')}>1</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('2')}>2</button>
+                            <button className="calculator-button digit" onClick={() => handleDigit('3')}>3</button>
+                            <button className="calculator-button operator" onClick={() => handleOperator('+')}>+</button>
+                            
+                            <button className="calculator-button digit" onClick={() => handleDigit('0')}>0</button>
+                            <button className="calculator-button digit" onClick={handleDecimal}>.</button>
+                            <button className="calculator-button function" onClick={handlePercentage}>%</button>
+                            <button className="calculator-button equals" onClick={handleEquals}>=</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 文本转换工具组件
+        const TextTransformer = ({ onClose }) => {
+            const [inputText, setInputText] = React.useState('');
+            const [resultText, setResultText] = React.useState('');
+            const [lastOperation, setLastOperation] = React.useState(null);
+            const resultRef = React.useRef(null);
+
+            const handleTransform = (operation) => {
+                if (!inputText) return;
+                
+                let transformedText = '';
+                
+                switch (operation) {
+                    case 'uppercase':
+                        transformedText = inputText.toUpperCase();
+                        break;
+                    case 'lowercase':
+                        transformedText = inputText.toLowerCase();
+                        break;
+                    case 'capitalize':
+                        transformedText = inputText.split(' ').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ).join(' ');
+                        break;
+                    case 'reverse':
+                        transformedText = inputText.split('').reverse().join('');
+                        break;
+                    case 'remove-spaces':
+                        transformedText = inputText.replace(/\s+/g, '');
+                        break;
+                    case 'count':
+                        const charCount = inputText.length;
+                        const wordCount = inputText.trim() === '' ? 0 : inputText.trim().split(/\s+/).length;
+                        const lineCount = inputText.split('\n').length;
+                        transformedText = `字符数: ${charCount}\n单词数: ${wordCount}\n行数: ${lineCount}`;
+                        break;
+                    default:
+                        transformedText = inputText;
+                }
+                
+                setResultText(transformedText);
+                setLastOperation(operation);
+            };
+
+            const handleClear = () => {
+                setInputText('');
+                setResultText('');
+                setLastOperation(null);
+            };
+
+            const handleRefresh = () => {
+                if (lastOperation) {
+                    handleTransform(lastOperation);
+                }
+            };
+
+            const handleCopyResult = () => {
+                if (resultText) {
+                    navigator.clipboard.writeText(resultText).then(() => {
+                        alert('已复制到剪贴板！');
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                    });
+                }
+            };
+
+            return (
+                <div className="tool-modal">
+                    <div className="tool-header">
+                        <h2>文本转换器</h2>
+                        <button className="close-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="text-transformer-container">
+                        <div className="text-input-container">
+                            <textarea
+                                className="text-input"
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                                placeholder="请输入要转换的文本..."
+                                rows={6}
+                            />
+                        </div>
+                        
+                        <div className="transform-buttons">
+                            <button className="transform-button" onClick={() => handleTransform('uppercase')}>
+                                全部大写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('lowercase')}>
+                                全部小写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('capitalize')}>
+                                首字母大写
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('reverse')}>
+                                反转文本
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('remove-spaces')}>
+                                移除空格
+                            </button>
+                            <button className="transform-button" onClick={() => handleTransform('count')}>
+                                统计字数
+                            </button>
+                            <button className="transform-button" onClick={handleClear}>
+                                清空
+                            </button>
+                            <button className="transform-button" onClick={handleRefresh}>
+                                刷新
+                            </button>
+                        </div>
+                        
+                        {resultText && (
+                            <div className="result-container">
+                                <h3>转换结果：</h3>
+                                <div className="result-text" ref={resultRef}>
+                                    {resultText}
+                                </div>
+                                <button className="copy-button" onClick={handleCopyResult}>
+                                    复制结果
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // 工具选择器组件
+        const ToolboxSelector = ({ onClose }) => {
+            const [selectedTool, setSelectedTool] = React.useState(null);
+
+            const openTool = (toolId) => {
+                setSelectedTool(toolId);
+            };
+
+            const closeToolModal = () => {
+                setSelectedTool(null);
+            };
+
+            return (
+                <>
+                    {selectedTool ? (
+                        selectedTool === 'calculator' ? (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <Calculator onClose={closeToolModal} />
+                                </div>
+                            </>
+                        ) : selectedTool === 'text-transformer' ? (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <TextTransformer onClose={closeToolModal} />
+                                </div>
+                            </>
+                        ) : selectedTool === 'image-compressor' ? (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <ImageCompressor onClose={closeToolModal} />
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="modal-backdrop" onClick={closeToolModal} />
+                                <div className="modal-content">
+                                    <div className="tool-modal">
+                                        <div className="tool-header">
+                                            <h2>工具未找到</h2>
+                                            <button className="close-button" onClick={closeToolModal}>×</button>
+                                        </div>
+                                        <div className="toolbox-container">
+                                            <p>抱歉，找不到您选择的工具。</p>
+                                            <button onClick={closeToolModal} className="copy-button">
+                                                返回工具箱
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )
+                    ) : (
+                        <div className="toolbox-container">
+                            <h2>多功能工具箱</h2>
+                            <p>选择您需要的工具：</p>
+                            <div className="tool-selector">
+                                <div 
+                                    className="tool-card" 
+                                    onClick={() => openTool('calculator')}
+                                >
+                                    <div className="tool-icon">🧮</div>
+                                    <div className="tool-name">计算器</div>
+                                </div>
+                                <div 
+                                    className="tool-card" 
+                                    onClick={() => openTool('text-transformer')}
+                                >
+                                    <div className="tool-icon">📝</div>
+                                    <div className="tool-name">文本转换器</div>
+                                </div>
+                                <div 
+                                    className="tool-card" 
+                                    onClick={() => openTool('image-compressor')}
+                                >
+                                    <div className="tool-icon">🖼️</div>
+                                    <div className="tool-name">图片压缩</div>
+                                </div>
+                            </div>
+                            <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                <button onClick={onClose} className="copy-button">
+                                    关闭工具箱
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        };
+
+        // 工具箱主组件
+        const Toolbox = () => {
+            // 默认不显示工具箱，用户需要自主点击开启
+            const [isOpen, setIsOpen] = React.useState(false);
+
+            // 切换工具箱显示状态
+            const toggleToolbox = () => {
+                setIsOpen(!isOpen);
+            };
+
+            // 关闭工具箱
+            const closeToolbox = () => {
+                setIsOpen(false);
+            };
+
+            return (
+                <>
+                    {/* 工具箱启动按钮 */}
+                    <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                        <button 
+                            className="toolbox-button"
+                            onClick={toggleToolbox}
+                        >
+                            打开工具箱
+                        </button>
+                    </div>
+
+                    {/* 工具箱面板 - 只在用户点击后显示 */}
+                    {isOpen && (
+                        <>
+                            {/* 背景遮罩层 */}
+                            <div 
+                                className="modal-backdrop"
+                                onClick={closeToolbox}
+                            />
+                            
+                            {/* 工具箱内容 */}
+                            <div className="toolbox-panel">
+                                <ToolboxSelector onClose={closeToolbox} />
+                            </div>
+                        </>
+                    )}
+                </>
+            );
+        };
+
+        // 渲染应用
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <div className="container">
+                  <h1>多功能工具箱</h1>
+                  <p>欢迎使用多功能工具箱，包含计算器和文本转换器等实用工具。</p>
+                  
+                  <div className="toolbox-section">
+                    {/* 工具箱将在这里渲染 */}
+                    <Toolbox />
+                  </div>
+                </div>
+            </React.StrictMode>
+        );
+    </script>
+</body>
+</html>
